@@ -2,48 +2,90 @@ package client;
 
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
+
 import util.PropertyLoader;
 
+/**
+ * 
+ * This class provides an universal, generic template for accessing resources
+ * within a service. It also provides common methods and utilities for accessing
+ * resources.
+ * 
+ * @author Francisco Frias
+ * @author Abel Guzman
+ * @author Amin Guzman
+ *
+ * @param <T>
+ *            The data type represented by the resource this client will access.
+ */
 public abstract class GenericClient<T> {
 	/*
-	 * Standard format in which the connection string must be generated
-	 * protocol://host:port/rootpath
+	 * Format: protocol://host:port/rootpath
 	 */
 	private static final String URL_FORMAT = "%s://%s:%s/%s";
 	private static final String PROPERTIES_NAMESPACE = "/config/service.properties";
 	private static final PropertyLoader serviceProperties = new PropertyLoader(PROPERTIES_NAMESPACE);
 
+	private StatusType lastUnsuccessfulStatus = null;
+
+	/**
+	 * Constructor.
+	 */
+	public GenericClient() {
+		init();
+	}
+
 	/**
 	 * 
-	 * Initialize service client instance and all associated resources.
+	 * Initialize the service client instance.
+	 * 
+	 * <p>
+	 * This function is implicitly called by the class constructor and should
+	 * initialize all variables and implement everything necessary in order connect
+	 * to and access the resource.
+	 * </p>
 	 */
-	public abstract void init();
+	protected abstract void init();
 
 	/**
 	 *
-	 * Close service client instance and all associated resources.
+	 * Closes the client instance and all associated resources.
+	 * 
+	 * <p>
+	 * Any resources opened in the {@link #GenericClient#init} method should be
+	 * closed here.
+	 * </p>
 	 */
 	public abstract void close();
 
 	/**
-	 * @return A List of all entities contained in this resource.
+	 * 
+	 * Retrieves a List of all entities contained within the resource. This method
+	 * is idempotent.
+	 * 
+	 * @return A List of all entities contained within this resource.
 	 */
 	public abstract List<T> readAll();
 
 	/**
 	 * 
-	 * Creates a new instance of the specified entity in this resource. Successive
-	 * calls to this method are not idempotent.
+	 * Creates a new instance of the specified entity within the resource. This
+	 * method is not idempotent.
 	 * 
 	 * @param entity
 	 *            Entity to create within this resource.
-	 * @return
+	 * @return A String containing the ID of the newly created entity or null if
+	 *         creation failed.
 	 */
-	public abstract boolean create(T entity);
+	public abstract String create(T entity);
 
 	/**
 	 * 
-	 * Retrieves the entity identified by the specified id within the resource.
+	 * Retrieves the entity stored under the specified id within the resource. This
+	 * method is idempotent.
 	 * 
 	 * @param entityId
 	 *            The id of the entity to retrieve.
@@ -54,32 +96,57 @@ public abstract class GenericClient<T> {
 
 	/**
 	 * 
-	 * Updates the entity identified by the specified id with the specified entity.
+	 * Updates the entity stored under the specified id with the data from an
+	 * updated entity object. This method is idempotent.
 	 * 
 	 * @param entityId
-	 *            The id of the entity to update.
+	 *            The ID of the entity to update.
 	 * @param entity
-	 *            The new entity.
-	 * @return
+	 *            The updated entity.
+	 * @return true if the operation was successful, false otherwise.
 	 */
 	public abstract boolean update(String entityId, T entity);
 
 	/**
 	 * 
-	 * Deletes the entity identified by the specified id.
+	 * Deletes the entity stored under the specified id. This method is idempotent.
 	 * 
 	 * @param entityId
-	 *            The id of the entity to delete.
-	 * @return
+	 *            The ID of the entity to delete.
+	 * @return true if the operation was successful, false otherwise.
 	 */
 	public abstract boolean delete(String entityId);
 
 	/**
 	 * 
-	 * @return String representation of the URL of the service as stored in default
-	 *         properties.
+	 * Provides a facility to allow implementing classes to report server responses
+	 * that indicate an unsuccessful request. Successful or neutral responses are
+	 * silently ignored by this method.
+	 * 
+	 * @param response
+	 *            The response we want to report.
 	 */
-	public static String generateServiceRootUrl() {
+	protected void reportUnsuccessful(Response response) {
+		Status.Family statusFamily = response.getStatusInfo().getFamily();
+		if (statusFamily.equals(Status.Family.CLIENT_ERROR) || statusFamily.equals(Status.Family.SERVER_ERROR)) {
+			lastUnsuccessfulStatus = response.getStatusInfo();
+		}
+	}
+
+	/**
+	 * @return The {@link javax.ws.rs.core.Response.Status} for the latest reported
+	 *         unsuccessful request, or null if no reports have been made.
+	 */
+	public StatusType getLastUnsuccessfulStatus() {
+		return lastUnsuccessfulStatus;
+	}
+
+	/**
+	 * 
+	 * @return String representation of the URL of the service as stored in the
+	 *         default service properties.
+	 */
+	public static String getServiceRootUrl() {
 		String protocol = serviceProperties.getProperty("protocol");
 		String host = serviceProperties.getProperty("host");
 		String port = serviceProperties.getProperty("port");

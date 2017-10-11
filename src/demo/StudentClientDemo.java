@@ -20,7 +20,7 @@ public class StudentClientDemo {
 
 		Student student = new Student();
 		student.setCedula("07100000007");
-		student.setStudentId("CI-0007");
+		student.setStudentId("CI0007");
 		student.setFirstName("James");
 		student.setFirstSurname("Bond");
 		student.setEmail("bond.james@sis.gov.uk");
@@ -38,7 +38,7 @@ public class StudentClientDemo {
 		});
 		
 		System.out.println("TEST: create");
-		client.create(student);
+		String uuid = client.create(student);
 		
 		students = client.readAll();
 
@@ -46,11 +46,11 @@ public class StudentClientDemo {
 			System.out.println(s);
 		}
 		
-		student = client.readByUniqueIdentifier("cedula", "07100000007");
+		student = client.read(uuid);
 		student.setMiddleName("Herbert");
 		
 		System.out.println("TEST: update");
-		client.update(student.getEntityId(), student);
+		client.update(uuid, student);
 		
 		students = client.readAll();
 
@@ -59,7 +59,7 @@ public class StudentClientDemo {
 		}
 		
 		System.out.println("TEST: delete");
-		client.delete(student.getEntityId());
+		client.delete(uuid);
 		
 		students = client.readAll();
 

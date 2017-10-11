@@ -36,7 +36,7 @@ public class EmployeeClientDemo {
 		});
 
 		System.out.println("TEST: create");
-		client.create(employee);
+		String uuid = client.create(employee);
 
 		employees = client.readAll();
 
@@ -44,11 +44,11 @@ public class EmployeeClientDemo {
 			System.out.println(e);
 		}
 
-		employee = client.readByUniqueIdentifier("cedula", "05800000007");
+		employee = client.read(uuid);
 		employee.setMiddleName("Herbert");
 
 		System.out.println("TEST: update");
-		client.update(employee.getEntityId(), employee);
+		client.update(uuid, employee);
 
 		employees = client.readAll();
 
@@ -57,7 +57,7 @@ public class EmployeeClientDemo {
 		}
 
 		System.out.println("TEST: delete");
-		client.delete(employee.getEntityId());
+		client.delete(uuid);
 
 		employees = client.readAll();
 
