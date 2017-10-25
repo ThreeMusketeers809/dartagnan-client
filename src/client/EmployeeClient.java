@@ -9,8 +9,8 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
-import core.Employee;
-import service.ServicePresets;
+import core.entities.Employee;
+import core.service.ServicePresets;
 
 /**
  * 

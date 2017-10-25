@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import client.EmployeeClient;
-import core.Employee;
-import core.PhoneNumber;
+import core.entities.Employee;
+import core.entities.PhoneNumber;
 
 public class EmployeeClientDemo {
 	public static void main(String[] args) {

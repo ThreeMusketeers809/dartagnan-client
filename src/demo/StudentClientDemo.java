@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import client.StudentClient;
-import core.PhoneNumber;
-import core.Student;
+import core.entities.PhoneNumber;
+import core.entities.Student;
 
 public class StudentClientDemo {
 	public static void main(String[] args) {
